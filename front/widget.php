@@ -68,12 +68,11 @@ class Incsub_Subscribe_By_Email_Widget extends WP_Widget {
 			}
 
 			$instance = apply_filters( 'sbe_validate_widget_instance', $instance, $this );
+			$instance = wp_parse_args( $instance, $this->get_default_settings() );
 
-			if ( ! $instance || array() === $instance ) {
+			if ( ! $instance ) {
 				return false;
 			}
-
-			$instance = wp_parse_args( $instance, $this->get_default_settings() );
 
 			if ( ! $doing_ajax ) {
 				$nonce = isset( $input['sbe_subscribe_nonce'] ) ? $input['sbe_subscribe_nonce'] : '';
