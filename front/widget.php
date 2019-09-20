@@ -30,8 +30,6 @@ class Incsub_Subscribe_By_Email_Widget extends WP_Widget {
 
 		add_action( 'wp_ajax_sbe_widget_subscribe_user', array( &$this, 'validate_widget' ) );
 		add_action( 'wp_ajax_nopriv_sbe_widget_subscribe_user', array( &$this, 'validate_widget' ) );
-
-		add_action( 'init', array( &$this, 'validate_widget' ) );
 	}
 
 	public function enqueue_scripts() {
