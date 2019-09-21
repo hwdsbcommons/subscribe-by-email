@@ -31,7 +31,7 @@ class Incsub_Subscribe_By_Email_Widget extends WP_Widget {
 		add_action( 'wp_ajax_sbe_widget_subscribe_user', array( &$this, 'validate_widget' ) );
 		add_action( 'wp_ajax_nopriv_sbe_widget_subscribe_user', array( &$this, 'validate_widget' ) );
 
-		add_action( 'init', array( &$this, 'validate_widget' ) );
+		//add_action( 'init', array( &$this, 'validate_widget' ) );
 	}
 
 	public function enqueue_scripts() {
@@ -62,20 +62,20 @@ class Incsub_Subscribe_By_Email_Widget extends WP_Widget {
 			$doing_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX;
 			$instance = $this->get_settings();
 
-			if ( ! array_key_exists( $this->number, $instance ) ) {
+			if ( ! array_key_exists( $_POST['instance'], $instance ) ) {
 				$instance = false;
 			}
 			else {
-				$instance = $instance[ $this->number ];
+				$instance = $instance[ $_POST['instance'] ];
 			}
 
 			$instance = apply_filters( 'sbe_validate_widget_instance', $instance, $this );
 
+			$instance = wp_parse_args( $instance, $this->get_default_settings() );
+
 			if ( ! $instance ) {
 				return false;
 			}
-
-			$instance = wp_parse_args( $instance, $this->get_default_settings() );
 
 			if ( ! $doing_ajax ) {
 				$nonce = isset( $input['sbe_subscribe_nonce'] ) ? $input['sbe_subscribe_nonce'] : '';
@@ -189,6 +189,8 @@ class Incsub_Subscribe_By_Email_Widget extends WP_Widget {
         		<?php $email = isset( $_POST['subscription-email'] ) ? $_POST['subscription-email'] : ''; ?>
         		<div aria-hidden="true" class="sbe-widget-form-field-title"><?php _e( 'Email address', INCSUB_SBE_LANG_DOMAIN ); ?></div><label class="sbe-screen-reader-text" for="sbe-widget-label"><?php _e( 'Email address', INCSUB_SBE_LANG_DOMAIN ); ?></label>
 	        	<input type="email" aria-describedby="sbe-widget-top-text-desc" class="sbe-widget-form-field sbe-widget-email-field sbe-form-field" id="sbe-widget-label" name="subscription-email" placeholder="<?php _e( 'ex: someone@mydomain.com', INCSUB_SBE_LANG_DOMAIN ); ?>" value="<?php echo esc_attr( $email ); ?>" required>
+
+			<input type="hidden" name="instance" value="<?php esc_attr_e( $this->number ); ?>" />
 
 	        	<?php if ( ! empty( $extra_fields ) ): ?>
 	        		<?php foreach ( $extra_fields as $key => $value ): ?>
