@@ -63,7 +63,10 @@ class Incsub_Subscribe_By_Email {
 		
 		
 		if ( ! get_transient( 'incsub_sbe_updating' ) ) {
-			add_action( 'transition_post_status', array( &$this, 'process_instant_subscriptions' ), 2, 3);
+			$settings = incsub_sbe_get_settings();
+			foreach ( $settings['post_types'] as $post_type ) {
+				add_action( "rest_after_insert_{$post_type}", array( $this, 'process_instant_subscriptions' ) );
+			}
 			add_action( 'wp_loaded', array( &$this, 'process_scheduled_subscriptions' ) );
 			add_action( 'init', array( &$this, 'maybe_delete_logs' ) );
 		}
@@ -695,10 +698,10 @@ class Incsub_Subscribe_By_Email {
 	 * @param Object $post 
 	 * @return type
 	 */
-	public function process_instant_subscriptions( $new_status, $old_status, $post ) {
+	public function process_instant_subscriptions( $post ) {
 		$settings = incsub_sbe_get_settings();
 
-		if ( in_array( $post->post_type, $settings['post_types'] ) && $new_status != $old_status && 'publish' == $new_status && $settings['frequency'] == 'inmediately' ) {
+		if ( in_array( $post->post_type, $settings['post_types'] ) && 'publish' == $post->post_status && $settings['frequency'] == 'inmediately' ) {
 			$this->enqueue_emails( array( $post->ID ) );	
 			// Trigger the first batch
 			delete_transient( self::$pending_mails_transient_slug );
