@@ -65,8 +65,11 @@ class Incsub_Subscribe_By_Email {
 		if ( ! get_transient( 'incsub_sbe_updating' ) ) {
 			$settings = incsub_sbe_get_settings();
 			foreach ( $settings['post_types'] as $post_type ) {
-				add_action( "rest_after_insert_{$post_type}", array( $this, 'process_instant_subscriptions' ) );
+				add_action( "rest_after_insert_{$post_type}", array( $this, 'process_instant_subscriptions_for_gutenberg' ) );
 			}
+
+			add_action( 'transition_post_status', array( $this, 'process_instant_subscriptions' ), 2, 3 );
+
 			add_action( 'wp_loaded', array( &$this, 'process_scheduled_subscriptions' ) );
 			add_action( 'init', array( &$this, 'maybe_delete_logs' ) );
 		}
@@ -689,6 +692,25 @@ class Incsub_Subscribe_By_Email {
 	}
 
 	/**
+	 * Executed each time a post created via the REST API.
+	 *
+	 * If the user wants to send a newsletter everytime a post is published
+	 * it will call send_mail function
+	 *
+	 * @param Object $post
+	 * @return type
+	 */
+	public function process_instant_subscriptions_for_gutenberg( $post ) {
+		$settings = incsub_sbe_get_settings();
+
+		if ( in_array( $post->post_type, $settings['post_types'] ) && 'publish' == $post->post_status && $settings['frequency'] == 'inmediately' ) {
+			$this->enqueue_emails( array( $post->ID ) );
+			// Trigger the first batch
+			delete_transient( self::$pending_mails_transient_slug );
+		}
+	}
+
+	/**
 	 * Executed each time a post changes its status. If the user
 	 * wants to send a newsletter everytime a post is published
 	 * it will call send_mail function
@@ -698,10 +720,17 @@ class Incsub_Subscribe_By_Email {
 	 * @param Object $post 
 	 * @return type
 	 */
-	public function process_instant_subscriptions( $post ) {
+	public function process_instant_subscriptions( $new_status, $old_status, $post ) {
+		require_once ABSPATH . 'wp-admin/includes/post.php';
+
+		// Bail if using the block editor as we use a different hook for that.
+		if ( use_block_editor_for_post( $post ) ) {
+			return;
+		}
+
 		$settings = incsub_sbe_get_settings();
 
-		if ( in_array( $post->post_type, $settings['post_types'] ) && 'publish' == $post->post_status && $settings['frequency'] == 'inmediately' ) {
+		if ( in_array( $post->post_type, $settings['post_types'] ) && $new_status != $old_status && 'publish' == $new_status && $settings['frequency'] == 'inmediately' ) {
 			$this->enqueue_emails( array( $post->ID ) );	
 			// Trigger the first batch
 			delete_transient( self::$pending_mails_transient_slug );
