@@ -251,7 +251,7 @@ function sbe_get_email_template( $posts = array(), $subscriber = false ) {
 	$classname = apply_filters( 'sbe_email_template_classname', 'SBE_Mail_Template' );
 
 	$sbe_template = false;
-	$variables = compact( 'posts', 'subject', 'subscriber' );
+	$variables = compact( 'posts', 'subscriber' );
     if ( class_exists( $classname ) ) {
         $r = new ReflectionClass( $classname );
         $sbe_template = $r->newInstanceArgs( $variables );
