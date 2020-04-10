@@ -60,7 +60,7 @@ class Incsub_Subscribe_By_Email_Settings_Handler {
 			$this->time[$i] = str_pad( $i, 2, 0, STR_PAD_LEFT ) . ':00';
 		}
 
-		$this->day_of_week = $wp_locale->weekday;
+		$this->day_of_week = ! empty( $wp_locale->weekday ) ? $wp_locale->weekday : '';
 
 		$this->confirmation_flag = array(
 			0 => __( 'Awaiting confirmation'),
