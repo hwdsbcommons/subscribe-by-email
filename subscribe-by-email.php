@@ -708,7 +708,8 @@ class Incsub_Subscribe_By_Email {
 		require_once ABSPATH . 'wp-admin/includes/post.php';
 
 		// Bail if using the block editor as we use a different hook for that.
-		if ( use_block_editor_for_post( $post ) ) {
+		// But only if it isn't a scheduled post.
+		if ( use_block_editor_for_post( $post ) && 'future' !== $old_status ) {
 			return;
 		}
 
