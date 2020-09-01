@@ -190,7 +190,12 @@ class Incsub_Subscribe_By_Email_Admin_Settings_Page extends Incsub_Subscribe_By_
 		elseif ( $this->get_current_tab() == 'content' ) {
 			$settings_handler = Incsub_Subscribe_By_Email_Settings_Handler::get_instance();
 
-			$post_types = $settings_handler->get_post_types();
+			// Fetch public post types.
+			$post_types = get_post_types( ['publicly_queryable' => true], 'object' );
+			unset( $post_types['attachment'] );
+
+			/** This filter is originally referenced in _inc/settings.php */
+			$post_types = apply_filters( 'sbe_get_post_types', $post_types );
 			
 				foreach ( $post_types as $post_type_slug => $post_type ) {
 					add_settings_section( 'post-type-' . $post_type_slug . '-settings', $post_type->labels->name, null, $this->get_menu_slug() );
