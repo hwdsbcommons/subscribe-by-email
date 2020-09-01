@@ -22,29 +22,27 @@ jQuery(document).ready(function($) {
 			$('input[type=submit]').trigger('click');
 		},
 		set_category_box_attrs: function(e) {
-			var element = $(this);
-			var the_list = element.closest('ul');
+			var the_list = $(this).closest('ul');
 
-			if ( element.attr('checked') && element.attr('value') == 'all' ) {
-				the_list.find('input').attr('checked',false);
-				the_list.find('input').attr('disabled',true);
-				element.attr('checked',true);
-				element.attr('disabled',false);
-			}
-			else if ( ! element.attr('checked') && element.attr('value') == 'all' ) {
-				the_list.find('input').attr('disabled',false);
+			if ( 'all' === e.currentTarget.value ) {
+				if ( e.currentTarget.checked ) {
+					the_list.find('input:not([value=all])').attr('checked',false);
+					the_list.find('input:not([value=all])').attr('disabled',true);
+				} else {
+					the_list.find('input:not([value=all])').attr('checked',false);
+					the_list.find('input:not([value=all])').attr('disabled',false);
+				}
+			} else {
+				the_list.find('input[value=all]').attr('checked',false);
 			}
 
 		},
 		init_categories_boxes: function() {
 			var boxes = $('.postbox').each( function( i, item ) {
 				var the_box = $(item);
-				var all_selector = the_box.find('input[value=all]');
-				if ( all_selector.attr('checked') ) {
-					the_box.find('input').attr('checked',false);
-					the_box.find('input').attr('disabled',true);
-					all_selector.attr('checked',true);
-					all_selector.attr('disabled',false);
+				if ( the_box.find('input[value=all]').attr('checked') ) {
+					the_box.find('input:not([value=all])').attr('checked',false);
+					the_box.find('input:not([value=all])').attr('disabled',true);
 				}
 			});
 		}

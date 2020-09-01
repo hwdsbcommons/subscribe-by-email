@@ -79,7 +79,7 @@ class Incsub_Subscribe_By_Email_Admin_Settings_Page extends Incsub_Subscribe_By_
 				wp_enqueue_script( 'sbe-settings-scripts', INCSUB_SBE_ASSETS_URL . 'js/settings-general.js', array( 'jquery' ), '20130721' );
 			}
 			elseif ( 'content' == $this->get_current_tab() ) {
-				wp_enqueue_script( 'sbe-settings-scripts', INCSUB_SBE_ASSETS_URL . 'js/settings-content.js', array( 'jquery' ), '20130721' );
+				wp_enqueue_script( 'sbe-settings-scripts', INCSUB_SBE_ASSETS_URL . 'js/settings-content.js', array( 'jquery' ), '20200901' );
 			}
 			elseif ( 'template' == $this->get_current_tab() ) {
 				wp_enqueue_media();
