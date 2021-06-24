@@ -4,6 +4,10 @@ class SBE_Do_Not_Send_Meta_Box {
 	public function __construct() {
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
 		add_action( 'save_post', array( $this, 'save' ) );
+
+		add_action( 'enqueue_block_editor_assets', function() {
+			add_filter( 'get_user_metadata', array( $this, 'force_to_side_for_block_editor' ), 10, 5 );
+		} );
 	}
 
 	public function add_meta_box() {
@@ -56,6 +60,65 @@ class SBE_Do_Not_Send_Meta_Box {
 			return $post_id;
 
 		update_post_meta( $post_id, '_sbe_do_not_send', true );
+	}
+
+	/**
+	 * Force display of SBE metabox to the side for the Block Editor only.
+	 *
+	 * @param  mixed  $retval    Null by default.
+	 * @param  int    $object_id User ID
+	 * @param  string $meta_key  User's meta key to check.
+	 * @param  bool   $single    Whether to return the first result of the meta.
+	 * @param  string $meta_type Metadata type.
+	 * @return mixed
+	 */
+	public function force_to_side_for_block_editor( $retval, $object_id, $meta_key, $single, $meta_type ) {
+		// If not checking our metabox order option, bail.
+		if ( 'meta-box-order_post' !== $meta_key ) {
+			return $retval;
+		}
+
+		/** The following logic copies get_metadata_raw() unless where stated */
+
+		$meta_cache = wp_cache_get( $object_id, $meta_type . '_meta' );
+	
+		if ( ! $meta_cache ) {
+			$meta_cache = update_meta_cache( $meta_type, array( $object_id ) );
+			if ( isset( $meta_cache[ $object_id ] ) ) {
+				$meta_cache = $meta_cache[ $object_id ];
+			} else {
+				$meta_cache = null;
+			}
+		}
+	
+		if ( ! $meta_key ) {
+			return $meta_cache;
+		}
+	
+		if ( isset( $meta_cache[ $meta_key ] ) ) {
+			if ( $single ) {
+				return maybe_unserialize( $meta_cache[ $meta_key ][0] );
+
+			// MOD: Enforce SBE metabox to the side here.
+			} else {
+				$meta_cache = array_map( 'maybe_unserialize', $meta_cache[ $meta_key ] );
+
+				$sbe = 'sbe-do-not-send';
+
+				if ( ! empty( $meta_cache['normal'] ) && false !== strpos( $meta_cache['normal'], $sbe ) ) {
+					// Remove 'sbe-do-not-send' from normal metabox.
+					$meta_cache['normal'] = array_diff( str_getcsv( $meta_cache['normal'] ), [ $sbe ] );
+					$meta_cache['normal'] = implode( ',', $meta_cache['normal'] );
+
+					// Now add 'sbe-do-not-send' to the side.
+					$meta_cache['side'] .= ',' . $sbe;
+				}
+
+				return $meta_cache;
+			}
+		}
+	
+		return null;
 	}
 }
 
