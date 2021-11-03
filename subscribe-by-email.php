@@ -707,12 +707,6 @@ class Incsub_Subscribe_By_Email {
 	public function process_instant_subscriptions( $new_status, $old_status, $post ) {
 		require_once ABSPATH . 'wp-admin/includes/post.php';
 
-		// Bail if using the block editor as we use a different hook for that.
-		// But only if it isn't a scheduled post.
-		if ( use_block_editor_for_post( $post ) && 'future' !== $old_status ) {
-			return;
-		}
-
 		$settings = incsub_sbe_get_settings();
 
 		if ( in_array( $post->post_type, $settings['post_types'] ) && $new_status != $old_status && 'publish' == $new_status && $settings['frequency'] == 'inmediately' ) {
