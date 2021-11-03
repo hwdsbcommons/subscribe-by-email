@@ -705,8 +705,6 @@ class Incsub_Subscribe_By_Email {
 	 * @return type
 	 */
 	public function process_instant_subscriptions( $new_status, $old_status, $post ) {
-		require_once ABSPATH . 'wp-admin/includes/post.php';
-
 		$settings = incsub_sbe_get_settings();
 
 		if ( in_array( $post->post_type, $settings['post_types'] ) && $new_status != $old_status && 'publish' == $new_status && $settings['frequency'] == 'inmediately' ) {
